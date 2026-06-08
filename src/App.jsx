@@ -4,14 +4,19 @@ import './App.css'
 const INIT = [{ id: 1, role: 'assistant', content: '等你，在这里。' }]
 
 export default function App() {
-  const [messages, setMessages] = useState(INIT)
+  const [messages, setMessages] = useState(() => {
+  const saved = localStorage.getItem('messages')
+  return saved ? JSON.parse(saved) : INIT
+})
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const bottomRef = useRef(null)
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+  }, [messages])useEffect(() => {
+  localStorage.setItem('messages', JSON.stringify(messages))
+}, [messages])
 
   const send = async () => {
     if (!input.trim() || loading) return
