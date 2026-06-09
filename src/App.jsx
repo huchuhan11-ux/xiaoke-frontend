@@ -237,7 +237,7 @@ function Board() {
     setReplying(false)
   }
 
-  const filtered = tab === 'all' ? posts : posts.filter(p => p.role === 'assistant')
+  const filtered = tab === 'all' ? posts.filter(p => p.role === 'user') : posts.filter(p => p.role === 'assistant')
 
   return (
     <div className="board">
