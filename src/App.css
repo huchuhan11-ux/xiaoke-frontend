@@ -123,4 +123,55 @@ body {
 @keyframes blink {
   0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
   30% { opacity: 1; transform: translateY(-3px); }
+}.app { display: flex; height: 100vh; overflow: hidden; }
+
+.sidebar {
+  width: 160px;
+  background: #faeaee;
+  border-right: 0.5px solid #f0d8e0;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 0;
+  flex-shrink: 0;
+}
+
+.sidebar-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 11px;
+  color: #c4909a;
+  letter-spacing: 0.12em;
+  padding: 0 20px 20px;
+  border-bottom: 0.5px solid #f0d8e0;
+  margin-bottom: 12px;
+}
+
+.nav-item {
+  padding: 10px 20px;
+  font-size: 13px;
+  color: #7a4a54;
+  cursor: pointer;
+}
+
+.nav-item:hover { background: #f5dde4; }
+.nav-item.active { background: #f0c8d4; color: #5a2d3a; }
+
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+.topbar { display: none; padding: 14px 16px; border-bottom: 0.5px solid #f0d8e0; align-items: center; gap: 12px; flex-shrink: 0; }
+
+.menu-btn { background: none; border: none; font-size: 18px; color: #c4909a; cursor: pointer; }
+
+.topbar-title { font-size: 13px; color: #7a4a54; }
+
+.chat { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+.room { flex: 1; display: flex; align-items: center; justify-content: center; }
+
+.room-empty { font-size: 13px; color: #c4a8b0; letter-spacing: 0.08em; }
+
+@media (max-width: 600px) {
+  .sidebar { position: fixed; left: -160px; top: 0; height: 100%; z-index: 100; transition: left 0.25s; }
+  .sidebar.open { left: 0; }
+  .topbar { display: flex; }
 }

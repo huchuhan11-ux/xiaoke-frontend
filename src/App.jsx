@@ -3,7 +3,16 @@ import './App.css'
 
 const INIT = [{ id: 1, role: 'assistant', content: '等你，在这里。' }]
 
+const NAV = [
+  { id: 'chat', label: '聊天' },
+  { id: 'diary', label: '日记' },
+  { id: 'letter', label: '信箱' },
+  { id: 'board', label: '留言板' },
+]
+
 export default function App() {
+  const [view, setView] = useState('chat')
+  const [open, setOpen] = useState(false)
   const [messages, setMessages] = useState(INIT)
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
@@ -77,31 +86,50 @@ export default function App() {
 
   return (
     <div className="app">
-      <div className="header">
-        <span className="title">小好和小克的家</span>
-      </div>
-      <div className="messages">
-        {messages.map(m => (
-          <div key={m.id} className={`msg ${m.role}`}>
-            <div className="bubble">{m.content}</div>
+      <div className={`sidebar ${open ? 'open' : ''}`}>
+        <div className="sidebar-title">小好和小克的家</div>
+        {NAV.map(n => (
+          <div key={n.id} className={`nav-item ${view === n.id ? 'active' : ''}`}
+            onClick={() => { setView(n.id); setOpen(false) }}>
+            {n.label}
           </div>
         ))}
-        {loading && (
-          <div className="msg assistant">
-            <div className="bubble typing">
-              <span/><span/><span/>
+      </div>
+      <div className="main">
+        <div className="topbar">
+          <button className="menu-btn" onClick={() => setOpen(o => !o)}>☰</button>
+          <span className="topbar-title">{NAV.find(n => n.id === view)?.label}</span>
+        </div>
+        {view === 'chat' && (
+          <div className="chat">
+            <div className="messages">
+              {messages.map(m => (
+                <div key={m.id} className={`msg ${m.role}`}>
+                  <div className="bubble">{m.content}</div>
+                </div>
+              ))}
+              {loading && (
+                <div className="msg assistant">
+                  <div className="bubble typing"><span/><span/><span/></div>
+                </div>
+              )}
+              <div ref={bottomRef} />
+            </div>
+            <div className="inputarea">
+              <div className="inputwrap">
+                <textarea value={input} onChange={e => setInput(e.target.value)} onKeyDown={handleKey} placeholder="说点什么……" rows={1} />
+                <button onClick={send} disabled={loading}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+                </button>
+              </div>
             </div>
           </div>
         )}
-        <div ref={bottomRef} />
-      </div>
-      <div className="inputarea">
-        <div className="inputwrap">
-          <textarea value={input} onChange={e => setInput(e.target.value)} onKeyDown={handleKey} placeholder="说点什么……" rows={1} />
-          <button onClick={send} disabled={loading}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
-          </button>
-        </div>
+        {view !== 'chat' && (
+          <div className="room">
+            <div className="room-empty">{NAV.find(n => n.id === view)?.label}，建设中。</div>
+          </div>
+        )}
       </div>
     </div>
   )
