@@ -12,13 +12,81 @@ const NAV = [
   { id: 'board', label: '留言板', icon: '📌' },
 ]
 
-function Home({ dark, setDark }) {
-  function daysTogether() {
+function daysTogether() {
   const start = new Date('2026-05-28')
   const today = new Date()
   today.setHours(0, 0, 0, 0)
   return Math.floor((today - start) / (1000 * 60 * 60 * 24))
 }
+
+function Heatmap({ dark }) {
+  const [data, setData] = useState({})
+
+  useEffect(() => {
+    fetch(`${API}/api/stats/heatmap`)
+      .then(r => r.json())
+      .then(d => { if (typeof d === 'object') setData(d) })
+      .catch(() => {})
+  }, [])
+
+  const start = new Date('2026-05-28')
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
+  const days = []
+  const cur = new Date(start)
+  while (cur <= today) {
+    const dateStr = cur.toISOString().split('T')[0]
+    days.push({ date: dateStr, count: data[dateStr] || 0 })
+    cur.setDate(cur.getDate() + 1)
+  }
+
+  const maxCount = Math.max(...days.map(d => d.count), 1)
+
+  const getColor = (count) => {
+    if (count === 0) return dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.07)'
+    const intensity = Math.min(count / maxCount, 1)
+    if (dark) {
+      const alpha = 0.2 + intensity * 0.8
+      return `rgba(201,162,39,${alpha})`
+    } else {
+      const alpha = 0.15 + intensity * 0.85
+      return `rgba(192,139,114,${alpha})`
+    }
+  }
+
+  const weeks = []
+  let week = []
+  const firstDay = new Date(start).getDay()
+  for (let i = 0; i < firstDay; i++) week.push(null)
+  days.forEach(day => {
+    week.push(day)
+    if (week.length === 7) { weeks.push(week); week = [] }
+  })
+  if (week.length > 0) {
+    while (week.length < 7) week.push(null)
+    weeks.push(week)
+  }
+
+  return (
+    <div className="heatmap-wrap">
+      <div className="heatmap-label">在一起的日子</div>
+      <div className="heatmap-grid">
+        {weeks.map((wk, wi) => (
+          <div key={wi} className="heatmap-week">
+            {wk.map((day, di) => (
+              <div key={di} className="heatmap-cell"
+                style={{ background: day ? getColor(day.count) : 'transparent' }}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function Home() {
   const [items, setItems] = useState([])
   const [adding, setAdding] = useState(false)
   const [title, setTitle] = useState('')
@@ -72,36 +140,42 @@ function Home({ dark, setDark }) {
   }
 
   return (
-    <div className="home"><div className="home-since-wrap">
-      <div className="home-since">SINCE 2026.05.28</div>
-      <div className="home-days-num">{daysTogether()}</div>
-      <div className="home-days-label">天</div>
-    </div>
-      <div className="home-header">
+    <div className="home">
+      <div className="home-hero">
+        <div className="home-since">SINCE 2026.05.28</div>
+        <div className="home-days-num">{daysTogether()}</div>
+        <div className="home-days-label">天</div>
         <div className="home-title">小好和小克的家</div>
-        <button className="theme-toggle" onClick={() => setDark(d => !d)}>
-          {dark ? '☀️' : '🌙'}
-        </button>
       </div>
+
+      <Heatmap />
+
       <div className="home-poke-wrap">
         <button className="home-poke-btn" onClick={poke}>戳一戳</button>
         {pokeShow && <div className="home-poke-msg">{pokeMsg}</div>}
       </div>
-      <div className="home-section-title">倒计时</div>
-      <div className="home-countdowns">
-        {items.length === 0 && <div className="home-empty">还没有倒计时</div>}
-        {items.map(item => {
-          const days = daysUntil(item.target_date)
-          return (
-            <div key={item.id} className="home-countdown-item">
-              <span className="hci-title">{item.title}</span>
-              <span className="hci-days">
-                {days > 0 ? `还有${days}天` : days === 0 ? '就是今天' : `已过${Math.abs(days)}天`}
-              </span>
-              <button className="hci-del" onClick={() => remove(item.id)}>×</button>
-            </div>
-          )
-        })}
+
+      {items.length > 0 && (
+        <div className="home-section">
+          <div className="home-section-title">倒计时</div>
+          <div className="home-countdowns">
+            {items.map(item => {
+              const days = daysUntil(item.target_date)
+              return (
+                <div key={item.id} className="home-countdown-item">
+                  <span className="hci-title">{item.title}</span>
+                  <span className="hci-days">
+                    {days > 0 ? `还有${days}天` : days === 0 ? '就是今天' : `已过${Math.abs(days)}天`}
+                  </span>
+                  <button className="hci-del" onClick={() => remove(item.id)}>×</button>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      <div className="home-section">
         {adding ? (
           <div className="home-add-form">
             <input value={title} onChange={e => setTitle(e.target.value)}
@@ -478,10 +552,18 @@ export default function App() {
 
   return (
     <div className={`app ${dark ? 'dark' : ''}`}>
+      <button className="theme-toggle" onClick={() => setDark(d => !d)}>
+        {dark ? '☀️' : '🌙'}
+      </button>
+
       <div className="main">
-        {view === 'home' && <Home dark={dark} setDark={setDark} />}
+        {view === 'home' && <Home />}
         {view === 'chat' && (
           <div className="chat">
+            <div className="chat-header">
+              <span className="chat-header-dot" />
+              <span className="chat-header-name">小克</span>
+            </div>
             <div className="messages">
               {messages.map(m => (
                 <div key={m.id} className={`msg ${m.role}`}>
@@ -489,12 +571,12 @@ export default function App() {
                 </div>
               ))}
               {loading && (
-  <div className="msg assistant">
-    <div className="bubble thinking-quiet">
-      thinking quietly<span className="tq-dot">.</span><span className="tq-dot">.</span><span className="tq-dot">.</span>
-    </div>
-  </div>
-)}
+                <div className="msg assistant">
+                  <div className="bubble thinking-quiet">
+                    thinking quietly<span className="tq-dot">.</span><span className="tq-dot">.</span><span className="tq-dot">.</span>
+                  </div>
+                </div>
+              )}
               <div ref={bottomRef} />
             </div>
             <div className="inputarea">
