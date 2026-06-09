@@ -3,48 +3,22 @@ import './App.css'
 
 const API = 'https://xiaoke-backend.onrender.com'
 const INIT = [{ id: 1, role: 'assistant', content: '等你，在这里。' }]
+
 const NAV = [
-  { id: 'chat', label: '聊天' },
-  { id: 'diary', label: '日记' },
-  { id: 'letter', label: '信箱' },
-  { id: 'board', label: '留言板' },
+  { id: 'home', label: '主页', icon: '🏠' },
+  { id: 'chat', label: '聊天', icon: '💬' },
+  { id: 'diary', label: '日记', icon: '📔' },
+  { id: 'letter', label: '信箱', icon: '✉️' },
+  { id: 'board', label: '留言板', icon: '📌' },
 ]
 
-function Poke() {
-  const [msg, setMsg] = useState('')
-  const [show, setShow] = useState(false)
-  const poke = async () => {
-    try {
-      const res = await fetch(`${API}/api/poke`)
-      const data = await res.json()
-      setMsg(data.message)
-      setShow(true)
-      setTimeout(() => setShow(false), 3000)
-    } catch {}
-  }
-  return (
-    <div style={{ padding: '8px 12px' }}>
-      <button onClick={poke} style={{
-        width: '100%', padding: '7px', background: 'transparent',
-        border: '1px solid rgba(160,128,96,0.2)', borderRadius: '8px',
-        color: '#8b7355', cursor: 'pointer', fontSize: '13px'
-      }}>戳一戳</button>
-      {show && (
-        <div style={{
-          marginTop: '6px', padding: '7px 10px',
-          background: 'rgba(255,255,255,0.8)', borderRadius: '8px',
-          fontSize: '12px', color: '#4a3728', textAlign: 'center'
-        }}>{msg}</div>
-      )}
-    </div>
-  )
-}
-
-function Countdowns() {
+function Home() {
   const [items, setItems] = useState([])
   const [adding, setAdding] = useState(false)
   const [title, setTitle] = useState('')
   const [date, setDate] = useState('')
+  const [pokeMsg, setPokeMsg] = useState('')
+  const [pokeShow, setPokeShow] = useState(false)
 
   function daysUntil(dateStr) {
     const target = new Date(dateStr)
@@ -59,6 +33,16 @@ function Countdowns() {
       .then(data => { if (Array.isArray(data)) setItems(data) })
       .catch(() => {})
   }, [])
+
+  const poke = async () => {
+    try {
+      const res = await fetch(`${API}/api/poke`)
+      const data = await res.json()
+      setPokeMsg(data.message)
+      setPokeShow(true)
+      setTimeout(() => setPokeShow(false), 3000)
+    } catch {}
+  }
 
   const add = async () => {
     if (!title.trim() || !date) return
@@ -82,58 +66,44 @@ function Countdowns() {
   }
 
   return (
-    <div style={{ padding: '8px 12px' }}>
-      {items.map(item => {
-        const days = daysUntil(item.target_date)
-        return (
-          <div key={item.id} style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            padding: '5px 8px', marginBottom: '4px',
-            background: 'rgba(255,255,255,0.5)', borderRadius: '7px', fontSize: '12px'
-          }}>
-            <span style={{ color: '#4a3728', flex: 1 }}>{item.title}</span>
-            <span style={{ color: '#c08b72', marginLeft: '6px', whiteSpace: 'nowrap' }}>
-              {days > 0 ? `还有${days}天` : days === 0 ? '今天' : `已过${Math.abs(days)}天`}
-            </span>
-            <button onClick={() => remove(item.id)} style={{
-              background: 'none', border: 'none', color: '#ccc',
-              cursor: 'pointer', padding: '0 0 0 6px', fontSize: '14px', lineHeight: 1
-            }}>×</button>
+    <div className="home">
+      <div className="home-title">小好和小克的家</div>
+
+      <div className="home-poke-wrap">
+        <button className="home-poke-btn" onClick={poke}>戳一戳</button>
+        {pokeShow && <div className="home-poke-msg">{pokeMsg}</div>}
+      </div>
+
+      <div className="home-section-title">倒计时</div>
+      <div className="home-countdowns">
+        {items.length === 0 && <div className="home-empty">还没有倒计时</div>}
+        {items.map(item => {
+          const days = daysUntil(item.target_date)
+          return (
+            <div key={item.id} className="home-countdown-item">
+              <span className="hci-title">{item.title}</span>
+              <span className="hci-days">
+                {days > 0 ? `还有${days}天` : days === 0 ? '就是今天' : `已过${Math.abs(days)}天`}
+              </span>
+              <button className="hci-del" onClick={() => remove(item.id)}>×</button>
+            </div>
+          )
+        })}
+        {adding ? (
+          <div className="home-add-form">
+            <input value={title} onChange={e => setTitle(e.target.value)}
+              placeholder="事件名称" className="home-input" />
+            <input type="date" value={date} onChange={e => setDate(e.target.value)}
+              className="home-input" />
+            <div className="home-add-btns">
+              <button className="home-btn-confirm" onClick={add}>确定</button>
+              <button className="home-btn-cancel" onClick={() => setAdding(false)}>取消</button>
+            </div>
           </div>
-        )
-      })}
-      {adding ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', marginTop: '4px' }}>
-          <input value={title} onChange={e => setTitle(e.target.value)}
-            placeholder="事件名称" style={{
-              padding: '5px 8px', borderRadius: '6px',
-              border: '1px solid rgba(160,128,96,0.2)', fontSize: '12px',
-              background: 'rgba(255,255,255,0.8)', color: '#4a3728', outline: 'none'
-            }} />
-          <input type="date" value={date} onChange={e => setDate(e.target.value)} style={{
-            padding: '5px 8px', borderRadius: '6px',
-            border: '1px solid rgba(160,128,96,0.2)', fontSize: '12px',
-            background: 'rgba(255,255,255,0.8)', color: '#4a3728', outline: 'none'
-          }} />
-          <div style={{ display: 'flex', gap: '5px' }}>
-            <button onClick={add} style={{
-              flex: 1, padding: '5px', background: '#c08b72', color: '#fff',
-              border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px'
-            }}>确定</button>
-            <button onClick={() => setAdding(false)} style={{
-              flex: 1, padding: '5px', background: 'transparent',
-              border: '1px solid rgba(160,128,96,0.2)', borderRadius: '6px',
-              cursor: 'pointer', fontSize: '12px', color: '#8b7355'
-            }}>取消</button>
-          </div>
-        </div>
-      ) : (
-        <button onClick={() => setAdding(true)} style={{
-          width: '100%', padding: '5px', marginTop: '2px', background: 'transparent',
-          border: '1px dashed rgba(160,128,96,0.25)', borderRadius: '7px',
-          color: '#8b7355', cursor: 'pointer', fontSize: '12px'
-        }}>+ 添加倒计时</button>
-      )}
+        ) : (
+          <button className="home-btn-add" onClick={() => setAdding(true)}>+ 添加倒计时</button>
+        )}
+      </div>
     </div>
   )
 }
@@ -422,8 +392,7 @@ function Board() {
 }
 
 export default function App() {
-  const [view, setView] = useState('chat')
-  const [open, setOpen] = useState(false)
+  const [view, setView] = useState('home')
   const [messages, setMessages] = useState(INIT)
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
@@ -486,30 +455,10 @@ export default function App() {
     }
   }
 
-  const handleKey = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() }
-  }
-
   return (
     <div className="app">
-      <div className={`sidebar ${open ? 'open' : ''}`}>
-        <div className="sidebar-title">小好和小克的家</div>
-        {NAV.map(n => (
-          <div key={n.id} className={`nav-item ${view === n.id ? 'active' : ''}`}
-            onClick={() => { setView(n.id); setOpen(false) }}>
-            {n.label}
-          </div>
-        ))}
-        <div style={{ marginTop: '12px', borderTop: '1px solid rgba(160,128,96,0.1)', paddingTop: '12px' }}>
-          <Countdowns />
-          <Poke />
-        </div>
-      </div>
       <div className="main">
-        <div className="topbar">
-          <button className="menu-btn" onClick={() => setOpen(o => !o)}>☰</button>
-          <span className="topbar-title">{NAV.find(n => n.id === view)?.label}</span>
-        </div>
+        {view === 'home' && <Home />}
         {view === 'chat' && (
           <div className="chat">
             <div className="messages">
@@ -528,7 +477,8 @@ export default function App() {
             <div className="inputarea">
               <div className="inputwrap">
                 <textarea value={input} onChange={e => setInput(e.target.value)}
-                  onKeyDown={handleKey} placeholder="说点什么……" rows={1} />
+                  onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() }}}
+                  placeholder="说点什么……" rows={1} />
                 <button onClick={send} disabled={loading}>
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                     <line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>
@@ -541,6 +491,16 @@ export default function App() {
         {view === 'diary' && <Diary />}
         {view === 'letter' && <Letter />}
         {view === 'board' && <Board />}
+      </div>
+
+      <div className="tabbar">
+        {NAV.map(n => (
+          <div key={n.id} className={`tab-item ${view === n.id ? 'active' : ''}`}
+            onClick={() => setView(n.id)}>
+            <span className="tab-icon">{n.icon}</span>
+            <span className="tab-label">{n.label}</span>
+          </div>
+        ))}
       </div>
     </div>
   )
