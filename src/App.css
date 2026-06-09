@@ -381,13 +381,16 @@ body {
   padding-bottom: 64px !important;
 }
 .theme-toggle {
-  display: block;
-  margin: -16px auto 24px;
-  background: none;
-  border: none;
-  font-size: 18px;
-  cursor: pointer;
-  opacity: 0.6;
+  position: fixed !important;
+  top: 12px !important;
+  right: 16px !important;
+  z-index: 200 !important;
+  background: none !important;
+  border: none !important;
+  font-size: 16px !important;
+  cursor: pointer !important;
+  opacity: 0.5 !important;
+  padding: 4px !important;
 }
 
 .dark {
@@ -664,4 +667,11 @@ body {
 @keyframes tqfade {
   0%, 100% { opacity: 0; }
   50% { opacity: 1; }
+}
+
+.heatmap-cell {
+  width: 12px !important;
+  height: 12px !important;
+  border-radius: 3px !important;
+  flex-shrink: 0 !important;
 }
