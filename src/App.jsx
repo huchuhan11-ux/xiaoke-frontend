@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
 import './App.css'
 
+const API = 'https://xiaoke-backend.onrender.com'
 const INIT = [{ id: 1, role: 'assistant', content: '等你，在这里。' }]
-
 const NAV = [
   { id: 'chat', label: '聊天' },
   { id: 'diary', label: '日记' },
@@ -10,24 +10,22 @@ const NAV = [
   { id: 'board', label: '留言板' },
 ]
 
+// ── 日记 ──
 function Diary() {
   const [entries, setEntries] = useState([])
   const [input, setInput] = useState('')
   const [posting, setPosting] = useState(false)
 
   const load = () => {
-    fetch('https://xiaoke-backend.onrender.com/api/diary')
-      .then(r => r.json())
-      .then(data => { if (Array.isArray(data)) setEntries(data) })
-      .catch(() => {})
+    fetch(`${API}/api/diary`).then(r => r.json())
+      .then(data => { if (Array.isArray(data)) setEntries(data) }).catch(() => {})
   }
-
   useEffect(() => { load() }, [])
 
   const submit = async () => {
     if (!input.trim() || posting) return
     setPosting(true)
-    await fetch('https://xiaoke-backend.onrender.com/api/diary', {
+    await fetch(`${API}/api/diary`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ content: input })
@@ -53,9 +51,13 @@ function Diary() {
       </div>
       <div className="inputarea">
         <div className="inputwrap">
-          <textarea value={input} onChange={e => setInput(e.target.value)} placeholder="今天……" rows={1} />
+          <textarea value={input} onChange={e => setInput(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit() }}}
+            placeholder="今天……" rows={1} />
           <button onClick={submit} disabled={posting}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>
+            </svg>
           </button>
         </div>
       </div>
@@ -63,6 +65,232 @@ function Diary() {
   )
 }
 
+// ── 信箱 ──
+function Letter() {
+  const [letters, setLetters] = useState([])
+  const [selected, setSelected] = useState(null)
+  const [replyInput, setReplyInput] = useState('')
+  const [generating, setGenerating] = useState(false)
+  const [replying, setReplying] = useState(false)
+
+  const load = () => {
+    fetch(`${API}/api/letters`).then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setLetters(data)
+          if (selected) {
+            const updated = data.find(l => l.id === selected.id)
+            if (updated) setSelected(updated)
+          }
+        }
+      }).catch(() => {})
+  }
+  useEffect(() => { load() }, [])
+
+  const generate = async () => {
+    if (generating) return
+    setGenerating(true)
+    try {
+      const res = await fetch(`${API}/api/letters/generate`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }
+      })
+      const data = await res.json()
+      if (data.id) {
+        setLetters(prev => [data, ...prev])
+        setSelected(data)
+      }
+    } catch {}
+    setGenerating(false)
+  }
+
+  const reply = async () => {
+    if (!replyInput.trim() || replying || !selected) return
+    setReplying(true)
+    try {
+      const res = await fetch(`${API}/api/letters/${selected.id}/comments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: 'user', content: replyInput })
+      })
+      const comments = await res.json()
+      setSelected(prev => ({ ...prev, letter_comments: comments }))
+      setLetters(prev => prev.map(l => l.id === selected.id ? { ...l, letter_comments: comments } : l))
+      setReplyInput('')
+    } catch {}
+    setReplying(false)
+  }
+
+  if (selected) {
+    const comments = [...(selected.letter_comments || [])].sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+    return (
+      <div className="letter-detail">
+        <div className="letter-back" onClick={() => setSelected(null)}>← 返回</div>
+        <div className="letter-scroll">
+          <div className="letter-title">{selected.title}</div>
+          <div className="letter-date">{new Date(selected.created_at).toLocaleDateString('zh-CN')}</div>
+          <div className="letter-body">{selected.content}</div>
+          <div className="letter-comments">
+            {comments.map(c => (
+              <div key={c.id} className={`letter-comment ${c.role}`}>
+                <div className="lc-role">{c.role === 'user' ? '小好' : '小克'}</div>
+                <div className="lc-content">{c.content}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="inputarea">
+          <div className="inputwrap">
+            <textarea value={replyInput} onChange={e => setReplyInput(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); reply() }}}
+              placeholder="回信……" rows={1} />
+            <button onClick={reply} disabled={replying}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="letter">
+      <div className="letter-list">
+        {letters.length === 0 && <div className="room-empty">还没有信。</div>}
+        {letters.map(l => (
+          <div key={l.id} className="letter-item" onClick={() => setSelected(l)}>
+            <div className="letter-item-title">{l.title}</div>
+            <div className="letter-item-date">{new Date(l.created_at).toLocaleDateString('zh-CN')}</div>
+          </div>
+        ))}
+      </div>
+      <div className="letter-footer">
+        <button onClick={generate} disabled={generating} className="generate-btn">
+          {generating ? '写信中…' : '让小克写封信 ✉'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ── 留言板 ──
+function Board() {
+  const [posts, setPosts] = useState([])
+  const [tab, setTab] = useState('all')
+  const [input, setInput] = useState('')
+  const [role, setRole] = useState('user')
+  const [posting, setPosting] = useState(false)
+  const [replyOpen, setReplyOpen] = useState(null)
+  const [replyInput, setReplyInput] = useState('')
+  const [replyRole, setReplyRole] = useState('user')
+  const [replying, setReplying] = useState(false)
+
+  useEffect(() => {
+    fetch(`${API}/api/board`).then(r => r.json())
+      .then(data => { if (Array.isArray(data)) setPosts(data) }).catch(() => {})
+  }, [])
+
+  const post = async () => {
+    if (!input.trim() || posting) return
+    setPosting(true)
+    try {
+      const res = await fetch(`${API}/api/board`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role, content: input })
+      })
+      const data = await res.json()
+      setPosts(prev => [data, ...prev])
+      setInput('')
+    } catch {}
+    setPosting(false)
+  }
+
+  const reply = async (postId) => {
+    if (!replyInput.trim() || replying) return
+    setReplying(true)
+    try {
+      const res = await fetch(`${API}/api/board/${postId}/comments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: replyRole, content: replyInput })
+      })
+      const comment = await res.json()
+      setPosts(prev => prev.map(p => p.id === postId
+        ? { ...p, board_comments: [...(p.board_comments || []), comment] }
+        : p
+      ))
+      setReplyInput('')
+      setReplyOpen(null)
+    } catch {}
+    setReplying(false)
+  }
+
+  const filtered = tab === 'all' ? posts : posts.filter(p => p.role === 'assistant')
+
+  return (
+    <div className="board">
+      <div className="board-tabs">
+        <div className={`board-tab ${tab === 'all' ? 'active' : ''}`} onClick={() => setTab('all')}>全部</div>
+        <div className={`board-tab ${tab === 'xiaoke' ? 'active' : ''}`} onClick={() => setTab('xiaoke')}>小克的话</div>
+      </div>
+      <div className="board-posts">
+        {filtered.length === 0 && <div className="room-empty">还没有留言。</div>}
+        {filtered.map(p => (
+          <div key={p.id} className={`board-post ${p.role === 'user' ? 'post-user' : 'post-ai'}`}>
+            <div className="post-header">
+              <span className="post-role">{p.role === 'user' ? '小好' : '小克'}</span>
+              <span className="post-date">{new Date(p.created_at).toLocaleDateString('zh-CN')}</span>
+            </div>
+            <div className="post-content">{p.content}</div>
+            {p.board_comments?.map(c => (
+              <div key={c.id} className={`board-comment ${c.role === 'user' ? 'bc-user' : 'bc-ai'}`}>
+                <span className="bc-role">{c.role === 'user' ? '小好' : '小克'}</span>
+                <span className="bc-content">{c.content}</span>
+              </div>
+            ))}
+            {replyOpen === p.id ? (
+              <div className="reply-area">
+                <div className="role-select small">
+                  <span className={replyRole === 'user' ? 'active' : ''} onClick={() => setReplyRole('user')}>小好</span>
+                  <span className={replyRole === 'assistant' ? 'active' : ''} onClick={() => setReplyRole('assistant')}>小克</span>
+                </div>
+                <div className="reply-input-row">
+                  <input value={replyInput} onChange={e => setReplyInput(e.target.value)}
+                    placeholder="回复…"
+                    onKeyDown={e => { if (e.key === 'Enter') reply(p.id) }} />
+                  <button onClick={() => reply(p.id)} disabled={replying}>发</button>
+                  <button className="cancel-btn" onClick={() => setReplyOpen(null)}>✕</button>
+                </div>
+              </div>
+            ) : (
+              <div className="reply-btn" onClick={() => { setReplyOpen(p.id); setReplyInput('') }}>回复</div>
+            )}
+          </div>
+        ))}
+      </div>
+      <div className="inputarea">
+        <div className="role-select">
+          <span className={role === 'user' ? 'active' : ''} onClick={() => setRole('user')}>小好</span>
+          <span className={role === 'assistant' ? 'active' : ''} onClick={() => setRole('assistant')}>小克</span>
+        </div>
+        <div className="inputwrap">
+          <textarea value={input} onChange={e => setInput(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); post() }}}
+            placeholder="留言……" rows={1} />
+          <button onClick={post} disabled={posting}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── 主应用 ──
 export default function App() {
   const [view, setView] = useState('chat')
   const [open, setOpen] = useState(false)
@@ -72,14 +300,13 @@ export default function App() {
   const bottomRef = useRef(null)
 
   useEffect(() => {
-    fetch('https://xiaoke-backend.onrender.com/api/messages?session_id=default')
+    fetch(`${API}/api/messages?session_id=default`)
       .then(r => r.json())
       .then(data => {
         if (data && data.length > 0) {
           setMessages([...INIT, ...data.map(m => ({ id: m.id, role: m.role, content: m.content }))])
         }
-      })
-      .catch(() => {})
+      }).catch(() => {})
   }, [])
 
   useEffect(() => {
@@ -92,24 +319,20 @@ export default function App() {
     setMessages(prev => [...prev, userMsg])
     setInput('')
     setLoading(true)
-
     const history = [...messages, userMsg]
       .filter(m => m.role === 'user' || m.role === 'assistant')
       .map(m => ({ role: m.role, content: m.content }))
-
     try {
-      const res = await fetch('https://xiaoke-backend.onrender.com/api/chat', {
+      const res = await fetch(`${API}/api/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: history, session_id: 'default' })
       })
-
       const reader = res.body.getReader()
       const decoder = new TextDecoder()
       let aiMsg = { id: Date.now(), role: 'assistant', content: '' }
       setMessages(prev => [...prev, aiMsg])
       let buffer = ''
-
       while (true) {
         const { done, value } = await reader.read()
         if (done) break
@@ -126,7 +349,7 @@ export default function App() {
           }
         }
       }
-    } catch (e) {
+    } catch {
       setMessages(prev => [...prev, { id: Date.now(), role: 'assistant', content: '出错了，待会儿再试。' }])
     } finally {
       setLoading(false)
@@ -170,20 +393,20 @@ export default function App() {
             </div>
             <div className="inputarea">
               <div className="inputwrap">
-                <textarea value={input} onChange={e => setInput(e.target.value)} onKeyDown={handleKey} placeholder="说点什么……" rows={1} />
+                <textarea value={input} onChange={e => setInput(e.target.value)}
+                  onKeyDown={handleKey} placeholder="说点什么……" rows={1} />
                 <button onClick={send} disabled={loading}>
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>
+                  </svg>
                 </button>
               </div>
             </div>
           </div>
         )}
         {view === 'diary' && <Diary />}
-        {view !== 'chat' && view !== 'diary' && (
-          <div className="room">
-            <div className="room-empty">{NAV.find(n => n.id === view)?.label}，建设中。</div>
-          </div>
-        )}
+        {view === 'letter' && <Letter />}
+        {view === 'board' && <Board />}
       </div>
     </div>
   )
