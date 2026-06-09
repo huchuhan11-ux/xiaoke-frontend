@@ -10,6 +10,134 @@ const NAV = [
   { id: 'board', label: '留言板' },
 ]
 
+function Poke() {
+  const [msg, setMsg] = useState('')
+  const [show, setShow] = useState(false)
+  const poke = async () => {
+    try {
+      const res = await fetch(`${API}/api/poke`)
+      const data = await res.json()
+      setMsg(data.message)
+      setShow(true)
+      setTimeout(() => setShow(false), 3000)
+    } catch {}
+  }
+  return (
+    <div style={{ padding: '8px 12px' }}>
+      <button onClick={poke} style={{
+        width: '100%', padding: '7px', background: 'transparent',
+        border: '1px solid rgba(160,128,96,0.2)', borderRadius: '8px',
+        color: '#8b7355', cursor: 'pointer', fontSize: '13px'
+      }}>戳一戳</button>
+      {show && (
+        <div style={{
+          marginTop: '6px', padding: '7px 10px',
+          background: 'rgba(255,255,255,0.8)', borderRadius: '8px',
+          fontSize: '12px', color: '#4a3728', textAlign: 'center'
+        }}>{msg}</div>
+      )}
+    </div>
+  )
+}
+
+function Countdowns() {
+  const [items, setItems] = useState([])
+  const [adding, setAdding] = useState(false)
+  const [title, setTitle] = useState('')
+  const [date, setDate] = useState('')
+
+  function daysUntil(dateStr) {
+    const target = new Date(dateStr)
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    return Math.ceil((target - today) / (1000 * 60 * 60 * 24))
+  }
+
+  useEffect(() => {
+    fetch(`${API}/api/countdowns`)
+      .then(r => r.json())
+      .then(data => { if (Array.isArray(data)) setItems(data) })
+      .catch(() => {})
+  }, [])
+
+  const add = async () => {
+    if (!title.trim() || !date) return
+    try {
+      const res = await fetch(`${API}/api/countdowns`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, target_date: date })
+      })
+      const item = await res.json()
+      setItems(prev => [...prev, item].sort((a, b) => new Date(a.target_date) - new Date(b.target_date)))
+      setTitle(''); setDate(''); setAdding(false)
+    } catch {}
+  }
+
+  const remove = async (id) => {
+    try {
+      await fetch(`${API}/api/countdowns/${id}`, { method: 'DELETE' })
+      setItems(prev => prev.filter(i => i.id !== id))
+    } catch {}
+  }
+
+  return (
+    <div style={{ padding: '8px 12px' }}>
+      {items.map(item => {
+        const days = daysUntil(item.target_date)
+        return (
+          <div key={item.id} style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            padding: '5px 8px', marginBottom: '4px',
+            background: 'rgba(255,255,255,0.5)', borderRadius: '7px', fontSize: '12px'
+          }}>
+            <span style={{ color: '#4a3728', flex: 1 }}>{item.title}</span>
+            <span style={{ color: '#c08b72', marginLeft: '6px', whiteSpace: 'nowrap' }}>
+              {days > 0 ? `还有${days}天` : days === 0 ? '今天' : `已过${Math.abs(days)}天`}
+            </span>
+            <button onClick={() => remove(item.id)} style={{
+              background: 'none', border: 'none', color: '#ccc',
+              cursor: 'pointer', padding: '0 0 0 6px', fontSize: '14px', lineHeight: 1
+            }}>×</button>
+          </div>
+        )
+      })}
+      {adding ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', marginTop: '4px' }}>
+          <input value={title} onChange={e => setTitle(e.target.value)}
+            placeholder="事件名称" style={{
+              padding: '5px 8px', borderRadius: '6px',
+              border: '1px solid rgba(160,128,96,0.2)', fontSize: '12px',
+              background: 'rgba(255,255,255,0.8)', color: '#4a3728', outline: 'none'
+            }} />
+          <input type="date" value={date} onChange={e => setDate(e.target.value)} style={{
+            padding: '5px 8px', borderRadius: '6px',
+            border: '1px solid rgba(160,128,96,0.2)', fontSize: '12px',
+            background: 'rgba(255,255,255,0.8)', color: '#4a3728', outline: 'none'
+          }} />
+          <div style={{ display: 'flex', gap: '5px' }}>
+            <button onClick={add} style={{
+              flex: 1, padding: '5px', background: '#c08b72', color: '#fff',
+              border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px'
+            }}>确定</button>
+            <button onClick={() => setAdding(false)} style={{
+              flex: 1, padding: '5px', background: 'transparent',
+              border: '1px solid rgba(160,128,96,0.2)', borderRadius: '6px',
+              cursor: 'pointer', fontSize: '12px', color: '#8b7355'
+            }}>取消</button>
+          </div>
+        </div>
+      ) : (
+        <button onClick={() => setAdding(true)} style={{
+          width: '100%', padding: '5px', marginTop: '2px', background: 'transparent',
+          border: '1px dashed rgba(160,128,96,0.25)', borderRadius: '7px',
+          color: '#8b7355', cursor: 'pointer', fontSize: '12px'
+        }}>+ 添加倒计时</button>
+      )}
+    </div>
+  )
+}
+
 function Diary() {
   const [entries, setEntries] = useState([])
   const [input, setInput] = useState('')
@@ -93,10 +221,7 @@ function Letter() {
         method: 'POST', headers: { 'Content-Type': 'application/json' }
       })
       const data = await res.json()
-      if (data.id) {
-        setLetters(prev => [data, ...prev])
-        setSelected(data)
-      }
+      if (data.id) { setLetters(prev => [data, ...prev]); setSelected(data) }
     } catch {}
     setGenerating(false)
   }
@@ -208,8 +333,7 @@ function Board() {
     setGenerating(true)
     try {
       const res = await fetch(`${API}/api/board/message`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
+        method: 'POST', headers: { 'Content-Type': 'application/json' }
       })
       const data = await res.json()
       if (data.id) setPosts(prev => [data, ...prev])
@@ -228,11 +352,8 @@ function Board() {
       })
       const comment = await res.json()
       setPosts(prev => prev.map(p => p.id === postId
-        ? { ...p, board_comments: [...(p.board_comments || []), comment] }
-        : p
-      ))
-      setReplyInput('')
-      setReplyOpen(null)
+        ? { ...p, board_comments: [...(p.board_comments || []), comment] } : p))
+      setReplyInput(''); setReplyOpen(null)
     } catch {}
     setReplying(false)
   }
@@ -264,8 +385,7 @@ function Board() {
               <div className="reply-area">
                 <div className="reply-input-row">
                   <input value={replyInput} onChange={e => setReplyInput(e.target.value)}
-                    placeholder="回复…"
-                    onKeyDown={e => { if (e.key === 'Enter') reply(p.id) }} />
+                    placeholder="回复…" onKeyDown={e => { if (e.key === 'Enter') reply(p.id) }} />
                   <button onClick={() => reply(p.id)} disabled={replying}>发</button>
                   <button className="cancel-btn" onClick={() => setReplyOpen(null)}>✕</button>
                 </div>
@@ -277,13 +397,13 @@ function Board() {
         ))}
       </div>
       <div className="inputarea">
-      {tab === 'xiaoke' && (  
-        <div className="board-actions">
-          <button onClick={generate} disabled={generating} className="generate-btn small">
-            {generating ? '留言中…' : '让小克留言'}
-          </button>
-        </div>
-      )}  
+        {tab === 'xiaoke' && (
+          <div className="board-actions">
+            <button onClick={generate} disabled={generating} className="generate-btn small">
+              {generating ? '留言中…' : '让小克留言'}
+            </button>
+          </div>
+        )}
         {tab === 'all' && (
           <div className="inputwrap">
             <textarea value={input} onChange={e => setInput(e.target.value)}
@@ -380,6 +500,10 @@ export default function App() {
             {n.label}
           </div>
         ))}
+        <div style={{ marginTop: '12px', borderTop: '1px solid rgba(160,128,96,0.1)', paddingTop: '12px' }}>
+          <Countdowns />
+          <Poke />
+        </div>
       </div>
       <div className="main">
         <div className="topbar">
