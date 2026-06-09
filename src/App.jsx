@@ -408,6 +408,8 @@ export default function App() {
   const bottomRef = useRef(null)
 
   useEffect(() => {
+    document.body.style.background = dark ? '#141210' : '#fdf6f0'
+  }, [dark])
     fetch(`${API}/api/messages?session_id=default`)
       .then(r => r.json())
       .then(data => {
