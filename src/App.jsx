@@ -13,6 +13,12 @@ const NAV = [
 ]
 
 function Home({ dark, setDark }) {
+  function daysTogether() {
+  const start = new Date('2026-05-28')
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  return Math.floor((today - start) / (1000 * 60 * 60 * 24))
+}
   const [items, setItems] = useState([])
   const [adding, setAdding] = useState(false)
   const [title, setTitle] = useState('')
@@ -66,7 +72,11 @@ function Home({ dark, setDark }) {
   }
 
   return (
-    <div className="home">
+    <div className="home"><div className="home-since-wrap">
+      <div className="home-since">SINCE 2026.05.28</div>
+      <div className="home-days-num">{daysTogether()}</div>
+      <div className="home-days-label">天</div>
+    </div>
       <div className="home-header">
         <div className="home-title">小好和小克的家</div>
         <button className="theme-toggle" onClick={() => setDark(d => !d)}>
@@ -479,10 +489,12 @@ export default function App() {
                 </div>
               ))}
               {loading && (
-                <div className="msg assistant">
-                  <div className="bubble typing"><span/><span/><span/></div>
-                </div>
-              )}
+  <div className="msg assistant">
+    <div className="bubble thinking-quiet">
+      thinking quietly<span className="tq-dot">.</span><span className="tq-dot">.</span><span className="tq-dot">.</span>
+    </div>
+  </div>
+)}
               <div ref={bottomRef} />
             </div>
             <div className="inputarea">

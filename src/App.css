@@ -600,3 +600,68 @@ body {
 .dark .room-empty {
   color: #4a4030;
 }
+.home-since-wrap {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.home-since {
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: #8b7355;
+  margin-bottom: 6px;
+}
+
+.dark .home-since {
+  color: #9a8a5a;
+}
+
+.home-days-num {
+  font-size: 48px;
+  font-weight: 200;
+  color: #4a3728;
+  line-height: 1;
+  letter-spacing: -1px;
+}
+
+.dark .home-days-num {
+  color: #c9a227;
+}
+
+.home-days-label {
+  font-size: 12px;
+  color: #8b7355;
+  margin-top: 4px;
+  letter-spacing: 1px;
+}
+
+.dark .home-days-label {
+  color: #9a8a5a;
+}
+
+.thinking-quiet {
+  font-size: 12px !important;
+  color: #8b7355 !important;
+  font-style: italic;
+  letter-spacing: 0.5px;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 6px 4px !important;
+}
+
+.dark .thinking-quiet {
+  color: #9a8a5a !important;
+}
+
+.tq-dot {
+  animation: tqfade 1.4s infinite;
+  opacity: 0;
+}
+
+.tq-dot:nth-child(2) { animation-delay: 0.3s; }
+.tq-dot:nth-child(3) { animation-delay: 0.6s; }
+
+@keyframes tqfade {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
