@@ -33,19 +33,38 @@ useEffect(() => {
 
     try {
       const res = await fetch('https://xiaoke-backend.onrender.com/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: history })
-      })
-      const data = await res.json()
-      setMessages(prev => [...prev, { id: Date.now(), role: 'assistant', content: data.content }])
-    } catch (e) {
-      setMessages(prev => [...prev, { id: Date.now(), role: 'assistant', content: '出错了，待会儿再试。' }])
-    } finally {
-      setLoading(false)
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: history })
+    })
+
+    const reader = res.body.getReader()
+    const decoder = new TextDecoder()
+    let aiMsg = { id: Date.now(), role: 'assistant', content: '' }
+    setMessages(prev => [...prev, aiMsg])
+
+    const reader = res.body.getReader()
+const decoder = new TextDecoder()
+let aiMsg = { id: Date.now(), role: 'assistant', content: '' }
+setMessages(prev => [...prev, aiMsg])
+let buffer = ''
+
+while (true) {
+  const { done, value } = await reader.read()
+  if (done) break
+  buffer += decoder.decode(value, { stream: true })
+  const lines = buffer.split('\n')
+  buffer = lines.pop()
+  for (const line of lines) {
+    if (line.startsWith('data: ') && line !== 'data: [DONE]') {
+      try {
+        const { text } = JSON.parse(line.slice(6))
+        aiMsg = { ...aiMsg, content: aiMsg.content + text }
+        setMessages(prev => prev.map(m => m.id === aiMsg.id ? aiMsg : m))
+      } catch {}
     }
   }
-
+}
   const handleKey = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() }
   }
