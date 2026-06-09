@@ -277,11 +277,13 @@ function Board() {
         ))}
       </div>
       <div className="inputarea">
+      {tab === 'xiaoke' && (  
         <div className="board-actions">
           <button onClick={generate} disabled={generating} className="generate-btn small">
             {generating ? '留言中…' : '让小克留言'}
           </button>
         </div>
+      )}  
         {tab === 'all' && (
           <div className="inputwrap">
             <textarea value={input} onChange={e => setInput(e.target.value)}
