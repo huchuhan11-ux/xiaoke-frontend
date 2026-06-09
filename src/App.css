@@ -269,3 +269,60 @@ body {
 .role-select span { font-size: 13px; color: #b89099; cursor: pointer; padding: 3px 10px; border-radius: 12px; border: 1px solid #f0d6d6; transition: all 0.15s; }
 .role-select span.active { background: #e8a0a8; color: #fff; border-color: #e8a0a8; }
 .role-select.small { padding: 0 0 4px; }
+/* ── 信箱 ── */
+.letter { display: flex; flex-direction: column; height: 100%; }
+.letter-list { flex: 1; overflow-y: auto; padding: 16px; }
+.letter-item { background: #fff; border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; cursor: pointer; border: 1px solid #f0d6d6; transition: background 0.15s; }
+.letter-item:hover { background: #fdf0f0; }
+.letter-item-title { font-size: 15px; color: #7a4f5a; font-weight: 500; }
+.letter-item-date { font-size: 12px; color: #b89099; margin-top: 4px; }
+.letter-footer { padding: 12px 16px; border-top: 1px solid #f5e0e0; text-align: center; }
+.generate-btn { background: #e8a0a8; color: #fff; border: none; border-radius: 20px; padding: 10px 24px; font-size: 14px; cursor: pointer; transition: background 0.2s; }
+.generate-btn:hover { background: #d88a92; }
+.generate-btn:disabled { background: #e8c5c8; cursor: not-allowed; }
+
+.letter-detail { display: flex; flex-direction: column; height: 100%; }
+.letter-back { padding: 12px 16px; color: #c48090; font-size: 14px; cursor: pointer; }
+.letter-back:hover { color: #a06070; }
+.letter-scroll { flex: 1; overflow-y: auto; padding: 0 20px 16px; }
+.letter-title { font-size: 18px; color: #7a4f5a; font-weight: 600; margin-bottom: 4px; }
+.letter-date { font-size: 12px; color: #b89099; margin-bottom: 14px; }
+.letter-body { font-size: 15px; color: #5a3a44; line-height: 1.8; white-space: pre-wrap; }
+.letter-comments { margin-top: 20px; border-top: 1px solid #f0d6d6; padding-top: 14px; }
+.letter-comment { margin-bottom: 12px; }
+.letter-comment.user { text-align: right; }
+.lc-role { font-size: 11px; color: #b89099; margin-bottom: 3px; }
+.lc-content { display: inline-block; background: #fff0f2; border-radius: 10px; padding: 8px 12px; font-size: 14px; color: #5a3a44; max-width: 85%; text-align: left; }
+.letter-comment.assistant .lc-content { background: #fce8ec; }
+
+/* ── 留言板 ── */
+.board { display: flex; flex-direction: column; height: 100%; }
+.board-tabs { display: flex; border-bottom: 1px solid #f0d6d6; }
+.board-tab { flex: 1; text-align: center; padding: 12px; font-size: 14px; color: #b89099; cursor: pointer; transition: all 0.15s; }
+.board-tab.active { color: #c4707e; border-bottom: 2px solid #c4707e; font-weight: 500; }
+.board-posts { flex: 1; overflow-y: auto; padding: 16px; }
+.board-post { background: #fff; border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; border: 1px solid #f0d6d6; }
+.post-ai { border-color: #f5c6cc; background: #fffafa; }
+.post-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.post-role { font-size: 12px; font-weight: 600; color: #c4707e; }
+.post-date { font-size: 11px; color: #c0a0a8; }
+.post-content { font-size: 14px; color: #5a3a44; line-height: 1.7; white-space: pre-wrap; }
+.board-comment { margin-top: 8px; padding-top: 8px; border-top: 1px solid #f5eaec; font-size: 13px; }
+.bc-role { font-weight: 600; color: #c4707e; margin-right: 6px; }
+.bc-content { color: #7a5560; }
+.reply-btn { font-size: 12px; color: #c0a0a8; margin-top: 8px; cursor: pointer; }
+.reply-btn:hover { color: #c4707e; }
+.reply-area { margin-top: 10px; }
+.reply-input-row { display: flex; gap: 6px; margin-top: 6px; }
+.reply-input-row input { flex: 1; border: 1px solid #f0d6d6; border-radius: 8px; padding: 6px 10px; font-size: 13px; outline: none; }
+.reply-input-row button { background: #e8a0a8; color: #fff; border: none; border-radius: 8px; padding: 6px 12px; font-size: 13px; cursor: pointer; }
+.cancel-btn { background: #f0e0e0 !important; color: #a08090 !important; }
+
+.role-select { display: flex; gap: 8px; padding: 6px 16px 0; }
+.role-select span { font-size: 13px; color: #b89099; cursor: pointer; padding: 3px 10px; border-radius: 12px; border: 1px solid #f0d6d6; transition: all 0.15s; }
+.role-select span.active { background: #e8a0a8; color: #fff; border-color: #e8a0a8; }
+.role-select.small { padding: 0 0 4px; }
+
+/* 留言板底部按钮 */
+.board-actions { padding: 6px 16px 0; }
+.generate-btn.small { padding: 6px 16px; font-size: 13px; }
