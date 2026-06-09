@@ -10,6 +10,59 @@ const NAV = [
   { id: 'board', label: '留言板' },
 ]
 
+function Diary() {
+  const [entries, setEntries] = useState([])
+  const [input, setInput] = useState('')
+  const [posting, setPosting] = useState(false)
+
+  const load = () => {
+    fetch('https://xiaoke-backend.onrender.com/api/diary')
+      .then(r => r.json())
+      .then(data => { if (Array.isArray(data)) setEntries(data) })
+      .catch(() => {})
+  }
+
+  useEffect(() => { load() }, [])
+
+  const submit = async () => {
+    if (!input.trim() || posting) return
+    setPosting(true)
+    await fetch('https://xiaoke-backend.onrender.com/api/diary', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content: input })
+    })
+    setInput('')
+    load()
+    setPosting(false)
+  }
+
+  return (
+    <div className="diary">
+      <div className="diary-entries">
+        {entries.length === 0 && <div className="room-empty">还没有日记。</div>}
+        {entries.map(e => (
+          <div key={e.id} className="diary-entry">
+            <div className="diary-date">{new Date(e.created_at).toLocaleDateString('zh-CN')}</div>
+            <div className="diary-content">{e.content}</div>
+            {e.diary_comments?.map(c => (
+              <div key={c.id} className="diary-comment">{c.content}</div>
+            ))}
+          </div>
+        ))}
+      </div>
+      <div className="inputarea">
+        <div className="inputwrap">
+          <textarea value={input} onChange={e => setInput(e.target.value)} placeholder="今天……" rows={1} />
+          <button onClick={submit} disabled={posting}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function App() {
   const [view, setView] = useState('chat')
   const [open, setOpen] = useState(false)
@@ -125,7 +178,8 @@ export default function App() {
             </div>
           </div>
         )}
-        {view !== 'chat' && (
+        {view === 'diary' && <Diary />}
+        {view !== 'chat' && view !== 'diary' && (
           <div className="room">
             <div className="room-empty">{NAV.find(n => n.id === view)?.label}，建设中。</div>
           </div>
