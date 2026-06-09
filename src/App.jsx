@@ -73,12 +73,10 @@ function Home({ dark, setDark }) {
           {dark ? '☀️' : '🌙'}
         </button>
       </div>
-
       <div className="home-poke-wrap">
         <button className="home-poke-btn" onClick={poke}>戳一戳</button>
         {pokeShow && <div className="home-poke-msg">{pokeMsg}</div>}
       </div>
-
       <div className="home-section-title">倒计时</div>
       <div className="home-countdowns">
         {items.length === 0 && <div className="home-empty">还没有倒计时</div>}
@@ -410,6 +408,8 @@ export default function App() {
   useEffect(() => {
     document.body.style.background = dark ? '#141210' : '#fdf6f0'
   }, [dark])
+
+  useEffect(() => {
     fetch(`${API}/api/messages?session_id=default`)
       .then(r => r.json())
       .then(data => {
