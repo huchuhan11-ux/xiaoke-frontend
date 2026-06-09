@@ -12,7 +12,7 @@ const NAV = [
   { id: 'board', label: '留言板', icon: '📌' },
 ]
 
-function Home() {
+function Home({ dark, setDark }) {
   const [items, setItems] = useState([])
   const [adding, setAdding] = useState(false)
   const [title, setTitle] = useState('')
@@ -67,7 +67,12 @@ function Home() {
 
   return (
     <div className="home">
-      <div className="home-title">小好和小克的家</div>
+      <div className="home-header">
+        <div className="home-title">小好和小克的家</div>
+        <button className="theme-toggle" onClick={() => setDark(d => !d)}>
+          {dark ? '☀️' : '🌙'}
+        </button>
+      </div>
 
       <div className="home-poke-wrap">
         <button className="home-poke-btn" onClick={poke}>戳一戳</button>
@@ -392,6 +397,10 @@ function Board() {
 }
 
 export default function App() {
+  const [dark, setDark] = useState(() => {
+    const h = new Date().getHours()
+    return h >= 20 || h < 7
+  })
   const [view, setView] = useState('home')
   const [messages, setMessages] = useState(INIT)
   const [input, setInput] = useState('')
@@ -456,9 +465,9 @@ export default function App() {
   }
 
   return (
-    <div className="app">
+    <div className={`app ${dark ? 'dark' : ''}`}>
       <div className="main">
-        {view === 'home' && <Home />}
+        {view === 'home' && <Home dark={dark} setDark={setDark} />}
         {view === 'chat' && (
           <div className="chat">
             <div className="messages">
