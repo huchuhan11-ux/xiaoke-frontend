@@ -39,11 +39,6 @@ useEffect(() => {
     })
 
     const reader = res.body.getReader()
-    const decoder = new TextDecoder()
-    let aiMsg = { id: Date.now(), role: 'assistant', content: '' }
-    setMessages(prev => [...prev, aiMsg])
-
-    const reader = res.body.getReader()
 const decoder = new TextDecoder()
 let aiMsg = { id: Date.now(), role: 'assistant', content: '' }
 setMessages(prev => [...prev, aiMsg])
@@ -63,7 +58,11 @@ while (true) {
         setMessages(prev => prev.map(m => m.id === aiMsg.id ? aiMsg : m))
       } catch {}
     }
-  }
+  }} catch (e) {
+      setMessages(prev => [...prev, { id: Date.now(), role: 'assistant', content: '出错了，待会儿再试。' }])
+    } finally {
+      setLoading(false)
+    }
 }
   const handleKey = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() }
