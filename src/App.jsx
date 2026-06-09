@@ -14,7 +14,7 @@ export default function App() {
       .then(r => r.json())
       .then(data => {
         if (data && data.length > 0) {
-          setMessages(data.map(m => ({ id: m.id, role: m.role, content: m.content })))
+          setMessages([...INIT, ...data.map(m => ({ id: m.id, role: m.role, content: m.content }))])
         }
       })
       .catch(() => {})
