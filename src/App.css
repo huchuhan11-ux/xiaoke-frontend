@@ -380,3 +380,223 @@ body {
 .main {
   padding-bottom: 64px !important;
 }
+.theme-toggle {
+  display: block;
+  margin: -16px auto 24px;
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  opacity: 0.6;
+}
+
+.dark {
+  background: #141210;
+}
+
+.dark .main {
+  background: #141210;
+}
+
+.dark .home-title {
+  color: #e8d5a3;
+}
+
+.dark .home-section-title {
+  color: #9a8a5a;
+}
+
+.dark .home-poke-btn {
+  border-color: rgba(201, 162, 39, 0.25);
+  color: #9a8a5a;
+}
+
+.dark .home-poke-msg {
+  color: #e8d5a3;
+}
+
+.dark .home-countdown-item {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.dark .hci-title {
+  color: #e8d5a3;
+}
+
+.dark .hci-days {
+  color: #c9a227;
+}
+
+.dark .home-empty {
+  color: #4a4030;
+}
+
+.dark .home-btn-add {
+  border-color: rgba(201, 162, 39, 0.2);
+  color: #9a8a5a;
+}
+
+.dark .home-input {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(201, 162, 39, 0.2);
+  color: #e8d5a3;
+}
+
+.dark .home-btn-confirm {
+  background: #c9a227;
+}
+
+.dark .home-btn-cancel {
+  border-color: rgba(201, 162, 39, 0.2);
+  color: #9a8a5a;
+}
+
+.dark .messages {
+  background: #141210;
+}
+
+.dark .bubble {
+  background: #1e1b14;
+  color: #e8d5a3;
+}
+
+.dark .msg.user .bubble {
+  background: #2a2418;
+  color: #e8d5a3;
+}
+
+.dark .inputarea {
+  background: #1a1710;
+  border-top: 1px solid rgba(201, 162, 39, 0.1);
+}
+
+.dark .inputwrap {
+  background: #1e1b14;
+  border-color: rgba(201, 162, 39, 0.15);
+}
+
+.dark .inputwrap textarea {
+  background: transparent;
+  color: #e8d5a3;
+}
+
+.dark .inputwrap textarea::placeholder {
+  color: #4a4030;
+}
+
+.dark .inputwrap button {
+  color: #c9a227;
+}
+
+.dark .tabbar {
+  background: rgba(20, 18, 14, 0.96) !important;
+  border-top: 1px solid rgba(201, 162, 39, 0.12) !important;
+}
+
+.dark .tab-label {
+  color: #9a8a5a !important;
+}
+
+.dark .tab-item.active .tab-label {
+  color: #c9a227 !important;
+}
+
+.dark .diary-entry {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.dark .diary-date {
+  color: #9a8a5a;
+}
+
+.dark .diary-content {
+  color: #e8d5a3;
+}
+
+.dark .diary-comment {
+  color: #c9a227;
+  border-left-color: rgba(201, 162, 39, 0.3);
+}
+
+.dark .letter-item {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.dark .letter-item-title {
+  color: #e8d5a3;
+}
+
+.dark .letter-item-date {
+  color: #9a8a5a;
+}
+
+.dark .letter-title {
+  color: #e8d5a3;
+}
+
+.dark .letter-date {
+  color: #9a8a5a;
+}
+
+.dark .letter-body {
+  color: #e8d5a3;
+}
+
+.dark .lc-role {
+  color: #c9a227;
+}
+
+.dark .lc-content {
+  color: #e8d5a3;
+}
+
+.dark .generate-btn {
+  background: transparent;
+  border-color: rgba(201, 162, 39, 0.25);
+  color: #9a8a5a;
+}
+
+.dark .board-tabs {
+  border-bottom-color: rgba(201, 162, 39, 0.1);
+}
+
+.dark .board-tab {
+  color: #9a8a5a;
+}
+
+.dark .board-tab.active {
+  color: #c9a227;
+  border-bottom-color: #c9a227;
+}
+
+.dark .board-post {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.dark .post-role {
+  color: #c9a227;
+}
+
+.dark .post-date {
+  color: #4a4030;
+}
+
+.dark .post-content {
+  color: #e8d5a3;
+}
+
+.dark .bc-role {
+  color: #9a8a5a;
+}
+
+.dark .bc-content {
+  color: #e8d5a3;
+}
+
+.dark .reply-btn {
+  color: #9a8a5a;
+}
+
+.dark .room-empty {
+  color: #4a4030;
+}
