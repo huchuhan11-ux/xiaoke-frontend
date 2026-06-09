@@ -12,13 +12,13 @@ export default function App() {
   const [loading, setLoading] = useState(false)
   const bottomRef = useRef(null)
 
-useEffect(() => {
-  bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-}, [messages])
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
 
-useEffect(() => {
-  localStorage.setItem('messages', JSON.stringify(messages))
-}, [messages])
+  useEffect(() => {
+    localStorage.setItem('messages', JSON.stringify(messages))
+  }, [messages])
 
   const send = async () => {
     if (!input.trim() || loading) return
@@ -33,37 +33,40 @@ useEffect(() => {
 
     try {
       const res = await fetch('https://xiaoke-backend.onrender.com/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages: history })
-    })
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: history })
+      })
 
-    const reader = res.body.getReader()
-const decoder = new TextDecoder()
-let aiMsg = { id: Date.now(), role: 'assistant', content: '' }
-setMessages(prev => [...prev, aiMsg])
-let buffer = ''
+      const reader = res.body.getReader()
+      const decoder = new TextDecoder()
+      let aiMsg = { id: Date.now(), role: 'assistant', content: '' }
+      setMessages(prev => [...prev, aiMsg])
+      let buffer = ''
 
-while (true) {
-  const { done, value } = await reader.read()
-  if (done) break
-  buffer += decoder.decode(value, { stream: true })
-  const lines = buffer.split('\n')
-  buffer = lines.pop()
-  for (const line of lines) {
-    if (line.startsWith('data: ') && line !== 'data: [DONE]') {
-      try {
-        const { text } = JSON.parse(line.slice(6))
-        aiMsg = { ...aiMsg, content: aiMsg.content + text }
-        setMessages(prev => prev.map(m => m.id === aiMsg.id ? aiMsg : m))
-      } catch {}
-    }
-  }} catch (e) {
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n')
+        buffer = lines.pop()
+        for (const line of lines) {
+          if (line.startsWith('data: ') && line !== 'data: [DONE]') {
+            try {
+              const { text } = JSON.parse(line.slice(6))
+              aiMsg = { ...aiMsg, content: aiMsg.content + text }
+              setMessages(prev => prev.map(m => m.id === aiMsg.id ? aiMsg : m))
+            } catch {}
+          }
+        }
+      }
+    } catch (e) {
       setMessages(prev => [...prev, { id: Date.now(), role: 'assistant', content: '出错了，待会儿再试。' }])
     } finally {
       setLoading(false)
     }
-}
+  }
+
   const handleKey = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() }
   }
