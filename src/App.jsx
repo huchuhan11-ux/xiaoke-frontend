@@ -86,7 +86,7 @@ function Heatmap({ dark }) {
   )
 }
 
-function Home() {
+function Home({ dark, setDark }) {
   const [items, setItems] = useState([])
   const [adding, setAdding] = useState(false)
   const [title, setTitle] = useState('')
@@ -146,6 +146,9 @@ function Home() {
         <div className="home-days-num">{daysTogether()}</div>
         <div className="home-days-label">天</div>
         <div className="home-title">小好和小克的家</div>
+        <button className="theme-toggle" onClick={() => setDark(d => !d)}>
+          {dark ? '☀️' : '🌙'}
+        </button>
       </div>
 
       <Heatmap />
@@ -552,12 +555,9 @@ export default function App() {
 
   return (
     <div className={`app ${dark ? 'dark' : ''}`}>
-      <button className="theme-toggle" onClick={() => setDark(d => !d)}>
-        {dark ? '☀️' : '🌙'}
-      </button>
 
       <div className="main">
-        {view === 'home' && <Home />}
+        {view === 'home' && <Home dark={dark} setDark={setDark} />}
         {view === 'chat' && (
           <div className="chat">
             <div className="chat-header">
