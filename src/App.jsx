@@ -4,20 +4,24 @@ import './App.css'
 const INIT = [{ id: 1, role: 'assistant', content: '等你，在这里。' }]
 
 export default function App() {
-  const [messages, setMessages] = useState(() => {
-    const saved = localStorage.getItem('messages')
-    return saved ? JSON.parse(saved) : INIT
-  })
+  const [messages, setMessages] = useState(INIT)
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const bottomRef = useRef(null)
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+    fetch('https://xiaoke-backend.onrender.com/api/messages?session_id=default')
+      .then(r => r.json())
+      .then(data => {
+        if (data && data.length > 0) {
+          setMessages(data.map(m => ({ id: m.id, role: m.role, content: m.content })))
+        }
+      })
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
-    localStorage.setItem('messages', JSON.stringify(messages))
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
   const send = async () => {
@@ -35,7 +39,7 @@ export default function App() {
       const res = await fetch('https://xiaoke-backend.onrender.com/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: history })
+        body: JSON.stringify({ messages: history, session_id: 'default' })
       })
 
       const reader = res.body.getReader()
