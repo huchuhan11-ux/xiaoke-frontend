@@ -12,6 +12,8 @@ const NAV = [
   { id: 'board', label: '留言板', icon: '📌' },
 ]
 
+const MOODS = ['平静', '开心', '难过', '焦虑', '生气', '困惑', '沉重', '期待']
+
 function daysTogether() {
   const start = new Date('2026-05-28')
   const today = new Date()
@@ -146,12 +148,9 @@ function Home({ dark, setDark }) {
         <div className="home-days-num">{daysTogether()}</div>
         <div className="home-days-label">天</div>
         <div className="home-title">小好和小克的家</div>
-        <button className="theme-toggle" onClick={() => setDark(d => !d)}>
-          {dark ? '☀️' : '🌙'}
-        </button>
       </div>
 
-      <Heatmap />
+      <Heatmap dark={dark} />
 
       <div className="home-poke-wrap">
         <button className="home-poke-btn" onClick={poke}>戳一戳</button>
@@ -201,6 +200,7 @@ function Home({ dark, setDark }) {
 function Diary() {
   const [entries, setEntries] = useState([])
   const [input, setInput] = useState('')
+  const [mood, setMood] = useState('')
   const [posting, setPosting] = useState(false)
 
   const load = () => {
@@ -215,9 +215,10 @@ function Diary() {
     await fetch(`${API}/api/diary`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content: input })
+      body: JSON.stringify({ content: input, mood })
     })
     setInput('')
+    setMood('')
     load()
     setPosting(false)
   }
@@ -228,7 +229,10 @@ function Diary() {
         {entries.length === 0 && <div className="room-empty">还没有日记。</div>}
         {entries.map(e => (
           <div key={e.id} className="diary-entry">
-            <div className="diary-date">{new Date(e.created_at).toLocaleDateString('zh-CN')}</div>
+            <div className="diary-entry-header">
+              <div className="diary-date">{new Date(e.created_at).toLocaleDateString('zh-CN')}</div>
+              {e.mood && <div className="diary-mood-tag">{e.mood}</div>}
+            </div>
             <div className="diary-content">{e.content}</div>
             {e.diary_comments?.map(c => (
               <div key={c.id} className="diary-comment">{c.content}</div>
@@ -236,16 +240,26 @@ function Diary() {
           </div>
         ))}
       </div>
-      <div className="inputarea">
-        <div className="inputwrap">
-          <textarea value={input} onChange={e => setInput(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit() }}}
-            placeholder="今天……" rows={1} />
-          <button onClick={submit} disabled={posting}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>
-            </svg>
-          </button>
+      <div className="diary-input-area">
+        <div className="diary-moods">
+          {MOODS.map(m => (
+            <button key={m} className={`diary-mood-btn ${mood === m ? 'active' : ''}`}
+              onClick={() => setMood(mood === m ? '' : m)}>
+              {m}
+            </button>
+          ))}
+        </div>
+        <div className="inputarea">
+          <div className="inputwrap">
+            <textarea value={input} onChange={e => setInput(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit() }}}
+              placeholder="今天……" rows={1} />
+            <button onClick={submit} disabled={posting}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -490,7 +504,9 @@ export default function App() {
   const [messages, setMessages] = useState(INIT)
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [bgImage, setBgImage] = useState(() => localStorage.getItem('chatBg') || '')
   const bottomRef = useRef(null)
+  const bgInputRef = useRef(null)
 
   useEffect(() => {
     document.body.style.background = dark ? '#141210' : '#fdf6f0'
@@ -509,6 +525,18 @@ export default function App() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+
+  const handleBgUpload = (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      const url = ev.target.result
+      setBgImage(url)
+      localStorage.setItem('chatBg', url)
+    }
+    reader.readAsDataURL(file)
+  }
 
   const send = async () => {
     if (!input.trim() || loading) return
@@ -555,31 +583,41 @@ export default function App() {
 
   return (
     <div className={`app ${dark ? 'dark' : ''}`}>
+      <button className="theme-toggle" onClick={() => setDark(d => !d)}>
+        {dark ? '☀️' : '🌙'}
+      </button>
 
       <div className="main">
         {view === 'home' && <Home dark={dark} setDark={setDark} />}
         {view === 'chat' && (
-          <div className="chat">
+          <div className="chat" style={bgImage ? {
+            backgroundImage: `url(${bgImage})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
+          } : {}}>
             <div className="chat-header">
               <span className="chat-header-dot" />
               <span className="chat-header-name">小克</span>
+              <button className="chat-bg-btn" onClick={() => bgInputRef.current?.click()}>🖼</button>
+              {bgImage && <button className="chat-bg-clear" onClick={() => { setBgImage(''); localStorage.removeItem('chatBg') }}>✕</button>}
+              <input ref={bgInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleBgUpload} />
             </div>
-            <div className="messages">
+            <div className="messages" style={bgImage ? { background: 'transparent' } : {}}>
               {messages.map(m => (
                 <div key={m.id} className={`msg ${m.role}`}>
-                  <div className="bubble">{m.content}</div>
+                  <div className={`bubble ${bgImage ? 'bubble-bg' : ''}`}>{m.content}</div>
                 </div>
               ))}
               {loading && (
                 <div className="msg assistant">
-                  <div className="bubble thinking-quiet">
+                  <div className={`bubble thinking-quiet ${bgImage ? 'bubble-bg' : ''}`}>
                     thinking quietly<span className="tq-dot">.</span><span className="tq-dot">.</span><span className="tq-dot">.</span>
                   </div>
                 </div>
               )}
               <div ref={bottomRef} />
             </div>
-            <div className="inputarea">
+            <div className="inputarea" style={bgImage ? { background: 'rgba(253,246,240,0.85)', backdropFilter: 'blur(12px)' } : {}}>
               <div className="inputwrap">
                 <textarea value={input} onChange={e => setInput(e.target.value)}
                   onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() }}}
