@@ -240,14 +240,16 @@ function Diary() {
           </div>
         ))}
       </div>
-      <div className="diary-input-area">
-        <div className="diary-moods">
-          {MOODS.map(m => (
-            <button key={m} className={`diary-mood-btn ${mood === m ? 'active' : ''}`}
-              onClick={() => setMood(mood === m ? '' : m)}>
-              {m}
-            </button>
-          ))}
+     <div className="diary-input-area">
+  <div className="diary-moods">
+    {MOODS.map(m => (
+      <button key={m}
+        className="diary-mood-btn"
+        style={mood === m ? { background: '#c08b72', color: '#fff', borderColor: '#c08b72' } : {}}
+        onClick={() => setMood(mood === m ? '' : m)}>
+        {m}
+      </button>
+    ))}
         </div>
         <div className="inputarea">
           <div className="inputwrap">
