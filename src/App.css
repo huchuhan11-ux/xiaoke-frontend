@@ -897,3 +897,7 @@ button.diary-mood-btn {
 .diary-moods button[style*="c08b72"] {
   color: #fff !important;
 }
+.diary-moods > button {
+  color: #8b7355 !important;
+  font-size: 12px !important;
+}
