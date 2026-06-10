@@ -691,6 +691,7 @@ button {
   -webkit-appearance: none;
   appearance: none;
   outline: none;
+  color: inherit;
 }
 
 .home-poke-btn {
