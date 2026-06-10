@@ -719,17 +719,6 @@ button {
   -webkit-appearance: none;
 }
 
-.diary-mood-btn {
-  padding: 4px 12px;
-  border-radius: 20px;
-  border: 1px solid rgba(160,128,96,0.25) !important;
-  background: transparent !important;
-  color: #8b7355 !important;
-  font-size: 12px;
-  cursor: pointer;
-  -webkit-appearance: none;
-}
-
 .heatmap-wrap {
   display: flex;
   flex-direction: column;
@@ -858,16 +847,4 @@ button {
 
 .dark .heatmap-label {
   color: rgba(154,138,90,0.4) !important;
-}
-
-/* mood按钮修复 */
-.diary-mood-btn {
-  border: 1px solid rgba(160,128,96,0.2);
-  background: transparent !important;
-  color: #8b7355 !important;
-  padding: 5px 14px !important;
-  border-radius: 20px !important;
-  font-size: 12px !important;
-  cursor: pointer !important;
-  transition: all 0.15s !important;
 }

@@ -244,11 +244,26 @@ function Diary() {
   <div className="diary-moods">
     {MOODS.map(m => (
       <button key={m}
-        className="diary-mood-btn"
-        style={mood === m ? { background: '#c08b72', color: '#fff', border: '1px solid #c08b72' } : {}}
-        onClick={() => setMood(mood === m ? '' : m)}>
-        {m}
-      </button>
+  className="diary-mood-btn"
+  style={mood === m ? {
+    background: '#c08b72',
+    color: '#fff',
+    border: '1px solid #c08b72',
+    padding: '5px 14px',
+    borderRadius: '20px',
+    fontSize: '12px',
+    cursor: 'pointer'
+  } : {
+    background: 'transparent',
+    color: '#8b7355',
+    border: '1px solid rgba(160,128,96,0.2)',
+    padding: '5px 14px',
+    borderRadius: '20px',
+    fontSize: '12px',
+    cursor: 'pointer'
+  }}
+  onClick={() => setMood(mood === m ? '' : m)}>
+  </button>
     ))}
         </div>
         <div className="inputarea">
