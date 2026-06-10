@@ -72,7 +72,7 @@ function Heatmap({ dark }) {
 
   return (
     <div className="heatmap-wrap">
-      <div className="heatmap-label">在一起的日子</div>
+      <div className="heatmap-label">DAYS TOGETHER</div>
       <div className="heatmap-grid">
         {weeks.map((wk, wi) => (
           <div key={wi} className="heatmap-week">
@@ -245,7 +245,7 @@ function Diary() {
     {MOODS.map(m => (
       <button key={m}
         className="diary-mood-btn"
-        style={mood === m ? { background: '#c08b72', color: '#fff', borderColor: '#c08b72' } : {}}
+        style={mood === m ? { background: '#c08b72', color: '#fff', border: '1px solid #c08b72' } : {}}
         onClick={() => setMood(mood === m ? '' : m)}>
         {m}
       </button>

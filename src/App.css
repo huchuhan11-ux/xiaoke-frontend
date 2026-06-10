@@ -836,3 +836,38 @@ button {
   color: #8b7355 !important;
   margin-bottom: 12px !important;
 }
+/* 日记间距 */
+.diary-entry {
+  margin-bottom: 24px !important;
+  padding: 20px !important;
+}
+
+.diary-comment {
+  margin-top: 16px !important;
+  padding-top: 16px !important;
+}
+
+/* 热力图标题 */
+.heatmap-label {
+  font-size: 10px !important;
+  letter-spacing: 3px !important;
+  text-transform: uppercase !important;
+  color: rgba(139,115,85,0.5) !important;
+  margin-bottom: 12px !important;
+}
+
+.dark .heatmap-label {
+  color: rgba(154,138,90,0.4) !important;
+}
+
+/* mood按钮修复 */
+.diary-mood-btn {
+  border: 1px solid rgba(160,128,96,0.2) !important;
+  background: transparent !important;
+  color: #8b7355 !important;
+  padding: 5px 14px !important;
+  border-radius: 20px !important;
+  font-size: 12px !important;
+  cursor: pointer !important;
+  transition: all 0.15s !important;
+}
