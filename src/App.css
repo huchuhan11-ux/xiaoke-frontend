@@ -890,3 +890,10 @@ button {
 button.diary-mood-btn {
   color: #8b7355 !important;
 }
+.diary-moods button {
+  color: #8b7355 !important;
+}
+
+.diary-moods button[style*="c08b72"] {
+  color: #fff !important;
+}
