@@ -184,6 +184,8 @@ function Home({ dark, setDark }) {
       setWishes(prev => prev.filter(w => w.id !== id))
     } catch {}
   }
+
+  return (
     <div className="home">
       <div className="home-hero">
         <div className="home-since">SINCE 2026.05.28</div>
