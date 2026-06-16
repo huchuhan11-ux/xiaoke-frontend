@@ -95,55 +95,14 @@ function Home({ dark, setDark }) {
   const [date, setDate] = useState('')
   const [pokeMsg, setPokeMsg] = useState('')
   const [pokeShow, setPokeShow] = useState(false)
+  const [wishes, setWishes] = useState([])
+  const [wishInput, setWishInput] = useState('')
+  const [addingWish, setAddingWish] = useState(false)
 
   function daysUntil(dateStr) {
     const target = new Date(dateStr)
     const today = new Date()
     today.setHours(0, 0, 0, 0)
-    const [wishes, setWishes] = useState([])
-const [wishInput, setWishInput] = useState('')
-const [addingWish, setAddingWish] = useState(false)
-
-useEffect(() => {
-  fetch(`${API}/api/wishes`)
-    .then(r => r.json())
-    .then(data => { if (Array.isArray(data)) setWishes(data) })
-    .catch(() => {})
-}, [])
-
-const addWish = async () => {
-  if (!wishInput.trim()) return
-  try {
-    const res = await fetch(`${API}/api/wishes`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content: wishInput })
-    })
-    const item = await res.json()
-    setWishes(prev => [...prev, item])
-    setWishInput('')
-    setAddingWish(false)
-  } catch {}
-}
-
-const toggleWish = async (id, done) => {
-  try {
-    const res = await fetch(`${API}/api/wishes/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ done: !done })
-    })
-    const item = await res.json()
-    setWishes(prev => prev.map(w => w.id === id ? item : w))
-  } catch {}
-}
-
-const deleteWish = async (id) => {
-  try {
-    await fetch(`${API}/api/wishes/${id}`, { method: 'DELETE' })
-    setWishes(prev => prev.filter(w => w.id !== id))
-  } catch {}
-}
     return Math.ceil((target - today) / (1000 * 60 * 60 * 24))
   }
 
@@ -151,6 +110,13 @@ const deleteWish = async (id) => {
     fetch(`${API}/api/countdowns`)
       .then(r => r.json())
       .then(data => { if (Array.isArray(data)) setItems(data) })
+      .catch(() => {})
+  }, [])
+
+  useEffect(() => {
+    fetch(`${API}/api/wishes`)
+      .then(r => r.json())
+      .then(data => { if (Array.isArray(data)) setWishes(data) })
       .catch(() => {})
   }, [])
 
@@ -185,7 +151,39 @@ const deleteWish = async (id) => {
     } catch {}
   }
 
-  return (
+  const addWish = async () => {
+    if (!wishInput.trim()) return
+    try {
+      const res = await fetch(`${API}/api/wishes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: wishInput })
+      })
+      const item = await res.json()
+      setWishes(prev => [...prev, item])
+      setWishInput('')
+      setAddingWish(false)
+    } catch {}
+  }
+
+  const toggleWish = async (id, done) => {
+    try {
+      const res = await fetch(`${API}/api/wishes/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ done: !done })
+      })
+      const item = await res.json()
+      setWishes(prev => prev.map(w => w.id === id ? item : w))
+    } catch {}
+  }
+
+  const deleteWish = async (id) => {
+    try {
+      await fetch(`${API}/api/wishes/${id}`, { method: 'DELETE' })
+      setWishes(prev => prev.filter(w => w.id !== id))
+    } catch {}
+  }
     <div className="home">
       <div className="home-hero">
         <div className="home-since">SINCE 2026.05.28</div>
