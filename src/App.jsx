@@ -100,6 +100,50 @@ function Home({ dark, setDark }) {
     const target = new Date(dateStr)
     const today = new Date()
     today.setHours(0, 0, 0, 0)
+    const [wishes, setWishes] = useState([])
+const [wishInput, setWishInput] = useState('')
+const [addingWish, setAddingWish] = useState(false)
+
+useEffect(() => {
+  fetch(`${API}/api/wishes`)
+    .then(r => r.json())
+    .then(data => { if (Array.isArray(data)) setWishes(data) })
+    .catch(() => {})
+}, [])
+
+const addWish = async () => {
+  if (!wishInput.trim()) return
+  try {
+    const res = await fetch(`${API}/api/wishes`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content: wishInput })
+    })
+    const item = await res.json()
+    setWishes(prev => [...prev, item])
+    setWishInput('')
+    setAddingWish(false)
+  } catch {}
+}
+
+const toggleWish = async (id, done) => {
+  try {
+    const res = await fetch(`${API}/api/wishes/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ done: !done })
+    })
+    const item = await res.json()
+    setWishes(prev => prev.map(w => w.id === id ? item : w))
+  } catch {}
+}
+
+const deleteWish = async (id) => {
+  try {
+    await fetch(`${API}/api/wishes/${id}`, { method: 'DELETE' })
+    setWishes(prev => prev.filter(w => w.id !== id))
+  } catch {}
+}
     return Math.ceil((target - today) / (1000 * 60 * 60 * 24))
   }
 
@@ -176,6 +220,34 @@ function Home({ dark, setDark }) {
           </div>
         </div>
       )}
+
+<div className="home-section">
+  <div className="home-section-title">许愿清单</div>
+  <div className="home-wishes">
+    {wishes.map(w => (
+      <div key={w.id} className={`wish-item ${w.done ? 'wish-done' : ''}`}>
+        <button className="wish-check" onClick={() => toggleWish(w.id, w.done)}>
+          {w.done ? '✓' : ''}
+        </button>
+        <span className="wish-content">{w.content}</span>
+        <button className="wish-del" onClick={() => deleteWish(w.id)}>×</button>
+      </div>
+    ))}
+    {addingWish ? (
+      <div className="wish-add-row">
+        <input value={wishInput} onChange={e => setWishInput(e.target.value)}
+          placeholder="想做什么……"
+          className="home-input"
+          onKeyDown={e => { if (e.key === 'Enter') addWish() }}
+          autoFocus />
+        <button className="home-btn-confirm" onClick={addWish} style={{ width: 'auto', padding: '8px 16px' }}>加</button>
+        <button className="home-btn-cancel" onClick={() => setAddingWish(false)} style={{ width: 'auto', padding: '8px 16px' }}>✕</button>
+      </div>
+    ) : (
+      <button className="home-btn-add" onClick={() => setAddingWish(true)}>+ 添加心愿</button>
+    )}
+  </div>
+</div>
 
       <div className="home-section">
         {adding ? (
